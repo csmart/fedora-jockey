@@ -6,7 +6,7 @@ Summary:        Jockey driver manager
 License:        GPLv2+
 URL:            https://launchpad.net/jockey
 Source0:        http://launchpad.net/jockey/trunk/%{version}/+download/%{name}-%{version}.tar.gz
-#Source1:        fedora-%{name}-%{version}.tar.bz2
+Source1:        fedora-%{name}-%{version}.tar.bz2
 Patch0:         jockey-0.9.3-execfix.patch
 
 BuildArch:      noarch 
@@ -47,16 +47,21 @@ way, and to be easily portable to different front-ends (GNOME, KDE,
 command line).
 
 %prep
-%setup -q
+%setup -q -a 1
 %patch0 -p1 -b .execfix
+cp fedora-%{name}-%{version}/%{name}/* %{name}/
 
 %build
 %{__python} setup.py build
 
-
 %install
-%{__python} setup.py install -O1 --root $RPM_BUILD_ROOT
-rm -r $RPM_BUILD_ROOT/%{_datadir}/doc
+%{__python} setup.py install -O1 --root %{buildroot}
+rm -r %{buildroot}/%{_datadir}/doc
+
+# install fedora extra files
+cp -a fedora-%{name}-%{version}/modaliases \
+      fedora-%{name}-%{version}/handlers \
+      %{buildroot}/%{_datadir}/%{name}
 
 desktop-file-validate %{buildroot}/%{_datadir}/applications/jockey-gtk.desktop
 desktop-file-validate %{buildroot}/%{_datadir}/applications/jockey-kde.desktop
@@ -83,6 +88,8 @@ fi
 %{_bindir}/jockey-text
 %{python_sitelib}/*
 %{_datadir}/%{name}/%{name}-backend
+%{_datadir}/%{name}/modaliases
+%{_datadir}/%{name}/handlers
 %{_datadir}/icons/hicolor/*/*/*
 %{_datadir}/dbus-1/system-services/*
 %{_datadir}/polkit-1/actions/*
