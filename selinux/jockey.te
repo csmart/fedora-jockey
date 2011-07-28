@@ -50,3 +50,6 @@ allow system_dbusd_t var_t:dir { write create add_name };
 # system_dbusd_var_run_t, system_dbusd_tmp_t
 
 allow system_dbusd_t var_t:file { write read create open getattr };
+
+# allow changing installed_packages file
+allow system_dbusd_t var_t:dir remove_name;
