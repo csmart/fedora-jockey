@@ -53,3 +53,4 @@ allow system_dbusd_t var_t:file { write read create open getattr };
 
 # allow changing installed_packages file
 allow system_dbusd_t var_t:dir remove_name;
+allow system_dbusd_t var_t:file unlink;
