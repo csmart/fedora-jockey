@@ -12,6 +12,7 @@ URL:            https://launchpad.net/jockey
 Source0:        http://launchpad.net/jockey/trunk/%{version}/+download/%{name}-%{version}.tar.gz
 Source1:        fedora-%{name}-%{version}.tar.bz2
 Patch0:         jockey-0.9.3-execfix.patch
+Patch1:         jockey-0.9.3-gtkwidthfix.patch
 
 BuildArch:      noarch 
 BuildRequires:  python2-devel python-distutils-extra gettext
@@ -70,6 +71,7 @@ can be run in enforcing mode.
 %prep
 %setup -q -a 1
 %patch0 -p1 -b .execfix
+%patch1 -p1 -b .gtkwidthfix
 cp fedora-%{name}-%{version}/%{name}/* %{name}/
 
 %build
@@ -88,9 +90,6 @@ cd -
 %install
 %{__python} setup.py install -O1 --root %{buildroot}
 rm -r %{buildroot}%{_datadir}/doc
-
-mkdir -p %{buildroot}%{_var}/log
-touch %{buildroot}%{_var}/log/jockey.log
 
 # install fedora extra files
 cp -a fedora-%{name}-%{version}/handlers \
@@ -152,7 +151,6 @@ fi
 %{_datadir}/dbus-1/system-services/*
 %{_datadir}/polkit-1/actions/*
 %{_sysconfdir}/dbus-1/system.d/*
-%{_var}/log/jockey.log
 
 %files gtk
 %{_bindir}/jockey-gtk
