@@ -15,7 +15,7 @@ Patch0:         jockey-0.9.3-execfix.patch
 
 BuildArch:      noarch 
 BuildRequires:  python2-devel python-distutils-extra gettext
-Requires:       dbus-python polkit PackageKit
+Requires:       dbus-python polkit PackageKit parsidora-modaliases
 
 %description
 Jockey provides an user interface and desktop integration for installation 
@@ -90,8 +90,7 @@ cd -
 rm -r %{buildroot}/%{_datadir}/doc
 
 # install fedora extra files
-cp -a fedora-%{name}-%{version}/modaliases \
-      fedora-%{name}-%{version}/handlers \
+cp -a fedora-%{name}-%{version}/handlers \
       %{buildroot}/%{_datadir}/%{name}
 
 # install the selinux module
@@ -145,7 +144,6 @@ fi
 %{_bindir}/jockey-text
 %{python_sitelib}/*
 %{_datadir}/%{name}/%{name}-backend
-%{_datadir}/%{name}/modaliases
 %{_datadir}/%{name}/handlers
 %{_datadir}/icons/hicolor/*/*/*
 %{_datadir}/dbus-1/system-services/*
