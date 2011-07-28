@@ -1,4 +1,6 @@
 %global jockey_version 0.9.3
+%global selinux_variants mls targeted
+%global selinux_policyver %(%{__sed} -e 's,.*selinux-policy-\\([^/]*\\)/.*,\\1,' /usr/share/selinux/devel/policyhelp || echo 0.0.0)
 
 Name:           jockey
 Version:        %{jockey_version}
@@ -48,14 +50,12 @@ and upgrade of third-party drivers. It is written in a distribution agnostic
 way, and to be easily portable to different front-ends (GNOME, KDE, 
 command line).
 
-%global selinux_variants mls targeted
 %package selinux
 Summary:        SELinux module for Jockey driver manager
 Version:        1.0.0
 BuildRequires:  checkpolicy selinux-policy-devel hardlink
 BuildRequires:  /usr/share/selinux/devel/policyhelp
 Requires:       %{name} = %{version}-%{release}
-%global selinux_policyver %(%{__sed} -e 's,.*selinux-policy-\\([^/]*\\)/.*,\\1,' /usr/share/selinux/devel/policyhelp || echo 0.0.0)
 Requires:       selinux-policy >= %{selinux_policyver}
 Requires(post):   /usr/sbin/semodule
 Requires(postun): /usr/sbin/semodule
