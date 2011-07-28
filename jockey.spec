@@ -55,7 +55,7 @@ Summary:        SELinux module for Jockey driver manager
 Version:        1.0.0
 BuildRequires:  checkpolicy selinux-policy-devel hardlink
 BuildRequires:  /usr/share/selinux/devel/policyhelp
-Requires:       %{name} = %{version}-%{release}
+Requires:       %{name} = %{jockey_version}-%{release}
 Requires:       selinux-policy >= %{selinux_policyver}
 Requires(post):   /usr/sbin/semodule
 Requires(postun): /usr/sbin/semodule
