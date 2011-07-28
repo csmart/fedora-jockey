@@ -1,5 +1,5 @@
 
-module jockey 1.0;
+module jockey 1.0.0;
 
 require {
 	type insmod_exec_t;
