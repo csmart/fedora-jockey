@@ -8,12 +8,14 @@ require {
 	type usr_t;
 	type modules_conf_t;
 	type modules_dep_t;
+	type modules_object_t;
 	type var_t;
 	type sysfs_t;
 	type system_dbusd_t;
 	type unconfined_t;
+	class capability sys_module;
 	class dbus send_msg;
-	class dir { write read remove_name create add_name };
+	class dir { write getattr read remove_name create add_name };
 	class file { execute read lock create execute_no_trans write getattr unlink open };
 }
 
@@ -54,3 +56,5 @@ allow system_dbusd_t var_t:file { write read create open getattr };
 # allow changing installed_packages file
 allow system_dbusd_t var_t:dir remove_name;
 allow system_dbusd_t var_t:file unlink;
+allow system_dbusd_t self:capability sys_module;
+allow system_dbusd_t modules_object_t:file { read open };
