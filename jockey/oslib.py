@@ -156,7 +156,7 @@ class OSLib:
         m = re.search("^\s*description:\s*'?(.*?)'?^\s+", out, re.M | re.S)
         if m:
             # TODO: short description (not accessible with pkcon)
-            return (package, m.group(1))
+            return (package, m.group(1).replace('\n', ''))
         else:
             raise ValueError('package %s does not exist' % package)
 
