@@ -11,11 +11,15 @@ require {
 	type var_t;
 	type sysfs_t;
 	type system_dbusd_t;
+	type unconfined_t;
+	class dbus send_msg;
 	class dir { write read remove_name create add_name };
 	class file { execute read lock create execute_no_trans write getattr unlink open };
 }
 
 #============= system_dbusd_t ==============
+allow system_dbusd_t unconfined_t:dbus send_msg;
+
 allow system_dbusd_t insmod_exec_t:file { read execute open execute_no_trans };
 #!!!! The source type 'system_dbusd_t' can write to a 'dir' of the following types:
 # system_dbusd_var_run_t, tmp_t, system_dbusd_tmp_t, var_run_t
