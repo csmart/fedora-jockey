@@ -72,6 +72,7 @@ can be run in enforcing mode.
 %setup -q -a 1
 %patch0 -p1 -b .execfix
 %patch1 -p1 -b .gtkwidthfix
+sed -i.nocert "s|'repository' not in|'repository' in|" jockey/ui.py
 cp fedora-%{name}-%{version}/%{name}/* %{name}/
 
 %build
