@@ -91,6 +91,7 @@ cd -
 %install
 %{__python} setup.py install -O1 --root %{buildroot}
 rm -r %{buildroot}%{_datadir}/doc
+mkdir -p %{buildroot}%{_var}/cache/%{name}
 
 # install fedora extra files
 cp -a fedora-%{name}-%{version}/handlers \
@@ -152,6 +153,7 @@ fi
 %{_datadir}/dbus-1/system-services/*
 %{_datadir}/polkit-1/actions/*
 %{_sysconfdir}/dbus-1/system.d/*
+%{_var}/cache/%{name}
 
 %files gtk
 %{_bindir}/jockey-gtk

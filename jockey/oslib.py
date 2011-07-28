@@ -210,7 +210,12 @@ class OSLib:
         self.package_description(package)
 
         pkcon = subprocess.Popen(['pkcon', 'install', '-v', '-y', package],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+
+        # we send an "1" to select package if several versions
+        # are available
+        print >>pkcon.stdin, "1\n"
 
         re_progress = re.compile('progress-changed (\d+), (\d+),')
 
