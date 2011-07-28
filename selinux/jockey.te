@@ -31,7 +31,7 @@ allow system_dbusd_t lib_t:file { write create unlink };
 #!!!! The source type 'system_dbusd_t' can write to a 'dir' of the following types:
 # system_dbusd_var_run_t, tmp_t, system_dbusd_tmp_t, var_run_t
 
-allow system_dbusd_t modules_conf_t:dir { read getattr write add_name remove_name };
+allow system_dbusd_t modules_conf_t:dir { read getattr create write add_name remove_name };
 #!!!! The source type 'system_dbusd_t' can write to a 'file' of the following types:
 # system_dbusd_var_run_t, system_dbusd_tmp_t
 
