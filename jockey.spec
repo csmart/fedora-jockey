@@ -23,7 +23,7 @@ command line).
 Summary:        GTK front-end for Jockey driver manager
 Requires:       %{name} = %{version}-%{release}
 Requires:       dbus-python polkit-gnome gdk-pixbuf2 gtk3 
-Requires:       gobject-introspection libnotify
+Requires:       gobject-introspection libnotify python-xkit
 
 %description gtk
 This package provides a GTK interface for Jockey.
