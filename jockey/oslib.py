@@ -209,7 +209,7 @@ class OSLib:
         # this will check if the package exists
         self.package_description(package)
 
-        pkcon = subprocess.Popen(['pkcon', 'install', '-v', '-y', package],
+        pkcon = subprocess.Popen(['pkcon', 'install', '--plain', '-y', package],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
 
@@ -217,7 +217,7 @@ class OSLib:
         # are available
         print >>pkcon.stdin, "1\n"
 
-        re_progress = re.compile('progress-changed (\d+), (\d+),')
+        re_progress = re.compile('Percentage:\t(\d+)')
 
         phase = None
         err = ''
@@ -228,14 +228,14 @@ class OSLib:
                 break
             if fail:
                 err += line
-            if 'status-changed download' in line:
+            if 'Downloading packages' in line:
                 phase = 'download'
-            elif 'status-changed commit' in line:
+            elif 'Testing changes' in line or 'Installing packages' in line:
                 phase = 'install'
-            elif progress_cb and 'progress-changed' in line:
+            elif progress_cb and 'Percentage' in line:
                 m = re_progress.search(line)
                 if m and phase:
-                    progress_cb(phase, int(m.group(1)), int(m.group(2)))
+                    progress_cb(phase, int(m.group(1)), 100)
                 else:
                     progress_cb(phase or 'download', -1, -1)
             elif 'WARNING' in line:
@@ -258,10 +258,10 @@ class OSLib:
 
         Any removal failure should be raised as a SystemError.
         '''
-        pkcon = subprocess.Popen(['pkcon', 'remove', '-v', '-y', package],
+        pkcon = subprocess.Popen(['pkcon', 'remove', '--plain', '-y', package],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-        re_progress = re.compile('progress-changed (\d+), (\d+),')
+        re_progress = re.compile('Percentage:\t(\d+)')
 
         have_progress = False
         err = ''
@@ -272,12 +272,12 @@ class OSLib:
                 break
             if fail:
                 err += line
-            if 'status-changed remove' in line:
+            if 'Removing packages' in line:
                 have_progress = True
-            elif progress_cb and 'progress-changed' in line:
+            elif progress_cb and 'Percentage' in line:
                 m = re_progress.search(line)
                 if m and have_progress:
-                    progress_cb(int(m.group(1)), int(m.group(2)))
+                    progress_cb(int(m.group(1)), 100)
                 else:
                     progress_cb(-1, -1)
             elif 'WARNING' in line:
