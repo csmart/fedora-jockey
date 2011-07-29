@@ -546,13 +546,17 @@ class OSLib:
         if not os.path.exists(d):
             os.makedirs(d)
 
-        f = open(self.module_blacklist_file, 'w')
+        f = None
         try:
+            f = open(self.module_blacklist_file, 'w')
             fcntl.flock(f.fileno(), fcntl.LOCK_EX)
             for module in sorted(self._module_blacklist):
                 print >> f, 'blacklist', module
+        except IOError as e:
+            logging.error('Failed to write to module blacklist: ' + str(e))
         finally:
-            f.close()
+            if f:
+                f.close()
 
     def _get_os_version(self):
         '''Initialize self.os_vendor and self.os_version.
