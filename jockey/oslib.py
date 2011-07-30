@@ -619,16 +619,22 @@ class OSLib:
 
     def _get_os_version(self):
         '''Initialize self.os_vendor and self.os_version.
-
-        This defaults to reading the values from lsb_release.
         '''
-        p = subprocess.Popen(['lsb_release', '-si'], stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, close_fds=True)
-        self.os_vendor = p.communicate()[0].strip()
-        p = subprocess.Popen(['lsb_release', '-sr'], stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, close_fds=True)
-        self.os_version = p.communicate()[0].strip()
-        assert p.returncode == 0
+        re_distinfo = re.compile('(\w+) release ([\d.]+) \((\w+)\)')
+        release_file = open('/etc/system-release')
+        dinfo_line = release_file.readline()
+        distinfo = re_distinfo.search(dinfo_line)
+        if distinfo:
+            self.os_vendor = distinfo.group(1)
+            self.os_version = distinfo.group(2)
+        else:
+            p = subprocess.Popen(['lsb_release', '-si'], stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, close_fds=True)
+            self.os_vendor = p.communicate()[0].strip()
+            p = subprocess.Popen(['lsb_release', '-sr'], stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, close_fds=True)
+            self.os_version = p.communicate()[0].strip()
+            assert p.returncode == 0
 
     def get_system_vendor_product(self):
         '''Return (vendor, product) of the system hardware.
