@@ -3,6 +3,7 @@
 # License: GPL v2 or later
 # Adopted for Fedora: Hedayat Vatankhah <hedayat.fwd@gmail.com>
 
+from jockey.oslib import OSLib
 from jockey.handlers import Handler, KernelModuleHandler
 
 # dummy stub for xgettext
@@ -13,7 +14,6 @@ class NvidiaDriver(KernelModuleHandler):
     Just to provide a better name and description! 
     '''
     def __init__(self, ui):
-        self._recommended = "kmod-nvidia"
         KernelModuleHandler.__init__(self, ui, 'nvidia',
             name=_('NVIDIA accelerated graphics driver'),
             description=_('3D-accelerated proprietary graphics driver for '
@@ -26,7 +26,23 @@ class NvidiaDriver(KernelModuleHandler):
                 'If this driver is not enabled, you will not be able to '
                 'enable desktop effects and will not be able to run software '
                 'that requires 3D acceleration, such as some games.'))
+        self._recommended = None
 
     def id(self):
         '''Return an unique identifier of the handler.'''
-        return 'vm:' + self.module
+        if self.package:
+            return 'kmod:' + self.module + ':' + self.package
+        return 'kmod:' + self.module
+
+    def recommended(self):
+        if self._recommended == None:
+            self._recommended = self.package == "kmod-nvidia"
+        return self._recommended
+
+    def disable(self):
+        '''Prevent the OS from using it even if the hardware is available.
+        '''
+        OSLib.inst.queue_packages_for_removal( { 'nvidia-xconfig',
+            'nvidia-settings' } )
+        KernelModuleHandler.disable(self)
+        return False

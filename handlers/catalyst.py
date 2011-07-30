@@ -21,6 +21,3 @@ class CatalystDriver(KernelModuleHandler):
                     'potential of some AMD (ATI) graphics cards, as well as provide '
                     '2D acceleration of newer cards.'))
 
-    def id(self):
-        '''Return an unique identifier of the handler.'''
-        return 'vm:' + self.module

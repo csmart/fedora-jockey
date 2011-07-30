@@ -20,6 +20,3 @@ class BroadcomDriver(KernelModuleHandler):
                ' device driver for use with Broadcom\'s BCM4311-, BCM4312-,'
                ' BCM4321-, and BCM4322-based hardware.\n\n'))
 
-    def id(self):
-        '''Return an unique identifier of the handler.'''
-        return 'vm:' + self.module
