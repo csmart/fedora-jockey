@@ -73,6 +73,7 @@ can be run in enforcing mode.
 %patch0 -p1 -b .execfix
 %patch1 -p1 -b .gtkwidthfix
 sed -i.nocert "s|'repository' not in|'repository' in|" jockey/ui.py
+sed -i.noblacklist "s|do_blacklist=True|do_blacklist=False|" jockey/handlers.py
 cp fedora-%{name}-%{version}/%{name}/* %{name}/
 
 %build
