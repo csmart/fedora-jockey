@@ -37,6 +37,8 @@ class OSLib:
         os.uname()[2]. This is primarily useful for distribution installers
         where the target system kernel differs from the installer kernel.
         '''
+        self.remove_pkg_queue = set()
+
         # relevant stuff for clients and backend
         self._get_os_version()
 
@@ -136,7 +138,6 @@ class OSLib:
 
     def package_installed(self, package):
         '''Return if the given package is installed.'''
-
         pkcon = subprocess.Popen(['pkcon', 'resolve', package],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out = pkcon.communicate()[0]
@@ -245,6 +246,9 @@ class OSLib:
         if pkcon.wait() != 0 or not self.package_installed(package):
             raise SystemError('package %s failed to install: %s' % (package, err)) 
             
+    def queue_packages_for_removal(self, packages):
+        self.remove_pkg_queue.update(packages)
+
     def remove_package(self, package, progress_cb):
         '''Uninstall the given package.
 
@@ -258,12 +262,68 @@ class OSLib:
 
         Any removal failure should be raised as a SystemError.
         '''
+        progress_cb(0, 100)
+        pkcon = subprocess.Popen(['pkcon', '--plain', '--filter=installed',
+                                  'search', 'name', package],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        re_packages = re.compile("Installed\s+([\w:.-]+)-([\w:.]+)-([\w:.]+)")
+
+        driver_packages = { package }
+        driver_packages.update(self.remove_pkg_queue)
+        self.remove_pkg_queue.clear()
+
+        err = ''
+        fail = False
+        line = pkcon.stdout.readline()
+        while pkcon.poll() == None or line != '':
+            if fail:
+                err += line
+            if 'Installed' in line:
+                m = re_packages.search(line)
+                if m:
+                    driver_packages.add(m.group(1))
+                else:
+                    logging.error('Cannot extract the package name from %s' % line)
+            elif 'WARNING' in line:
+                fail = True
+            line = pkcon.stdout.readline()
+
+        err += pkcon.stderr.read()
+        pkcon.wait()
+
+        progress_start = 100
+        progress_total = 100 + 100 * len(driver_packages)
+
+        logging.debug('Removing packages: %s' % driver_packages)
+        for pkg in driver_packages:
+            progress_cb(progress_start, progress_total)
+            self.remove_single_package(pkg, progress_cb, progress_start,
+                progress_total)
+            progress_start += 100
+
+        if self.package_installed(package):
+            raise SystemError('package %s failed to remove: %s' % (package, err)) 
+
+    def remove_single_package(self, package, progress_cb, progress_start,
+                              progress_total):
+        '''Uninstall the given package.
+
+        As this is called in the backend, this must happen noninteractively.
+        For progress reporting, progress_cb(current, total) is called
+        regularly. Passes progress_start for current and/or progress_total
+        for total if time cannot be determined.
+
+        If this succeeds, subsequent package_installed(package) calls must
+        return False.
+
+        Any removal failure should be raised as a SystemError.
+        '''
         pkcon = subprocess.Popen(['pkcon', 'remove', '--plain', '-y', package],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         re_progress = re.compile('Percentage:\t(\d+)')
 
-        have_progress = False
         err = ''
         fail = False
         while pkcon.poll() == None:
@@ -272,14 +332,12 @@ class OSLib:
                 break
             if fail:
                 err += line
-            if 'Removing packages' in line:
-                have_progress = True
             elif progress_cb and 'Percentage' in line:
                 m = re_progress.search(line)
-                if m and have_progress:
-                    progress_cb(int(m.group(1)), 100)
+                if m:
+                    progress_cb(progress_start + int(m.group(1)), progress_total)
                 else:
-                    progress_cb(-1, -1)
+                    progress_cb(progress_start, progress_total)
             elif 'WARNING' in line:
                 fail = True
 
