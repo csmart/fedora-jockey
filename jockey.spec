@@ -72,6 +72,7 @@ can be run in enforcing mode.
 %patch0 -p1 -b .gtkwidthfix
 sed -i.execfix "s|'|\"|g" gtk/autostart/jockey-gtk.desktop.in \
          kde/autostart/jockey-kde.desktop.in
+sed -i.trayfix "s|if indicator:|if indicator or trayicon:|" gtk/jockey-gtk
 sed -i.nocert "s|'repository' not in|'repository' in|" jockey/ui.py
 sed -i.noblacklist "s|do_blacklist=True|do_blacklist=False|" jockey/handlers.py
 cp fedora-%{name}-%{version}/%{name}/* %{name}/
