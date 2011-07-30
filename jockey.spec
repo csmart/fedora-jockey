@@ -95,6 +95,11 @@ cd -
 rm -r %{buildroot}%{_datadir}/doc
 mkdir -p %{buildroot}%{_var}/cache/%{name}
 
+# Move autostart files to the new place
+mkdir -p %{buildroot}%{_sysconfdir}/xdg/autostart/
+mv %{buildroot}%{_datadir}/autostart/* %{buildroot}%{_sysconfdir}/xdg/autostart/
+rmdir %{buildroot}%{_datadir}/autostart/
+
 # install fedora extra files
 cp -a fedora-%{name}-%{version}/handlers \
       %{buildroot}%{_datadir}/%{name}
@@ -113,8 +118,10 @@ done
 desktop-file-validate %{buildroot}%{_datadir}/applications/jockey-gtk.desktop
 desktop-file-validate %{buildroot}%{_datadir}/applications/jockey-kde.desktop
 
-desktop-file-validate %{buildroot}%{_datadir}/autostart/jockey-gtk.desktop
-desktop-file-validate %{buildroot}%{_datadir}/autostart/jockey-kde.desktop
+desktop-file-validate  \
+      %{buildroot}%{_sysconfdir}/xdg/autostart/jockey-gtk.desktop
+desktop-file-validate  \
+      %{buildroot}%{_sysconfdir}/xdg/autostart/jockey-kde.desktop
 
 %find_lang %{name}
 
@@ -161,7 +168,7 @@ fi
 %{_bindir}/jockey-gtk
 %{_datadir}/%{name}/%{name}-gtk.ui
 %{_datadir}/applications/jockey-gtk.desktop
-%{_datadir}/autostart/jockey-gtk.desktop
+%{_sysconfdir}/xdg/autostart/jockey-gtk.desktop
 %{_datadir}/dbus-1/services/*
 
 %files kde
@@ -171,7 +178,7 @@ fi
 %{_datadir}/%{name}/ProgressDialog.ui
 
 %{_datadir}/applications/jockey-kde.desktop
-%{_datadir}/autostart/jockey-kde.desktop
+%{_sysconfdir}/xdg/autostart/jockey-kde.desktop
 %{_datadir}/kde4/apps/jockey/jockey.notifyrc
 
 %files selinux
