@@ -11,8 +11,7 @@ License:        GPLv2+
 URL:            https://launchpad.net/jockey
 Source0:        http://launchpad.net/jockey/trunk/%{version}/+download/%{name}-%{version}.tar.gz
 Source1:        fedora-%{name}-%{version}.tar.bz2
-Patch0:         jockey-0.9.3-execfix.patch
-Patch1:         jockey-0.9.3-gtkwidthfix.patch
+Patch0:         jockey-0.9.3-gtkwidthfix.patch
 
 BuildArch:      noarch 
 BuildRequires:  python2-devel python-distutils-extra gettext
@@ -70,8 +69,9 @@ can be run in enforcing mode.
 
 %prep
 %setup -q -a 1
-%patch0 -p1 -b .execfix
-%patch1 -p1 -b .gtkwidthfix
+%patch0 -p1 -b .gtkwidthfix
+sed -i.execfix "s|'|\"|g" gtk/autostart/jockey-gtk.desktop.in \
+         kde/autostart/jockey-kde.desktop.in
 sed -i.nocert "s|'repository' not in|'repository' in|" jockey/ui.py
 sed -i.noblacklist "s|do_blacklist=True|do_blacklist=False|" jockey/handlers.py
 cp fedora-%{name}-%{version}/%{name}/* %{name}/
