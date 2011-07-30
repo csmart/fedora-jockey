@@ -221,12 +221,10 @@ class OSLib:
         re_progress = re.compile('Percentage:\t(\d+)')
 
         phase = None
-        err = ''
+        err = line = ''
         fail = False
-        while pkcon.poll() == None:
+        while pkcon.poll() == None or line != '':
             line = pkcon.stdout.readline()
-            if line == '':
-                break
             if fail:
                 err += line
             if 'Downloading packages' in line:
@@ -241,6 +239,8 @@ class OSLib:
                     progress_cb(phase or 'download', -1, -1)
             elif 'WARNING' in line:
                 fail = True
+            elif 'transaction-error' in line or 'failed:' in line:
+                err += line
 
         err += pkcon.stderr.read()
         if pkcon.wait() != 0 or not self.package_installed(package):
@@ -273,10 +273,10 @@ class OSLib:
         driver_packages.update(self.remove_pkg_queue)
         self.remove_pkg_queue.clear()
 
-        err = ''
+        err = line = ''
         fail = False
-        line = pkcon.stdout.readline()
         while pkcon.poll() == None or line != '':
+            line = pkcon.stdout.readline()
             if fail:
                 err += line
             if 'Installed' in line:
@@ -287,7 +287,8 @@ class OSLib:
                     logging.error('Cannot extract the package name from %s' % line)
             elif 'WARNING' in line:
                 fail = True
-            line = pkcon.stdout.readline()
+            elif 'transaction-error' in line or 'failed:' in line:
+                err += line
 
         err += pkcon.stderr.read()
         pkcon.wait()
@@ -324,12 +325,10 @@ class OSLib:
 
         re_progress = re.compile('Percentage:\t(\d+)')
 
-        err = ''
+        err = line = ''
         fail = False
-        while pkcon.poll() == None:
+        while pkcon.poll() == None or line != '':
             line = pkcon.stdout.readline()
-            if line == '':
-                break
             if fail:
                 err += line
             elif progress_cb and 'Percentage' in line:
@@ -340,6 +339,8 @@ class OSLib:
                     progress_cb(progress_start, progress_total)
             elif 'WARNING' in line:
                 fail = True
+            elif 'transaction-error' in line or 'failed:' in line:
+                err += line
 
         err += pkcon.stderr.read()
         pkcon.wait()
