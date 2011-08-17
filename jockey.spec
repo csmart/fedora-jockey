@@ -4,7 +4,7 @@
 
 Name:           jockey
 Version:        %{jockey_version}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Jockey driver manager
 
 License:        GPLv2+
@@ -15,7 +15,7 @@ Patch0:         jockey-0.9.3-gtkwidthfix.patch
 
 BuildArch:      noarch 
 BuildRequires:  python2-devel python-distutils-extra gettext
-Requires:       dbus-python polkit PackageKit parsidora-modaliases
+Requires:       dbus-python polkit PackageKit python-xkit parsidora-modaliases
 
 %description
 Jockey provides an user interface and desktop integration for installation 
@@ -27,7 +27,7 @@ command line).
 Summary:        GTK front-end for Jockey driver manager
 Requires:       %{name} = %{version}-%{release}
 Requires:       dbus-python polkit-gnome gdk-pixbuf2 gtk3 
-Requires:       gobject-introspection libnotify python-xkit
+Requires:       gobject-introspection libnotify
 
 %description gtk
 This package provides a GTK interface for Jockey.
@@ -186,6 +186,9 @@ fi
 %{_datadir}/selinux/*/%{name}.pp
 
 %changelog
+* Thu Aug 18 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.3-2
+- jockey should depend on xkit, not jockey-gtk
+
 * Thu Jul 28 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.3-1
 - Initial version
 
