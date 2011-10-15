@@ -69,12 +69,22 @@ class OSLib:
         # default path to custom handlers
         self.handler_dir = '/usr/share/jockey/handlers'
 
+        if target_kernel:
+            self.target_kernel = target_kernel
+        else:
+            self.target_kernel = os.uname()[2]
+
         # default paths to modalias files (directory entries will consider all
         # files in them)
 
 #            '/lib/modules/%s/modules.alias' % os.uname()[2],
+        if re.search('.*PAE.*', self.target_kernel):
+            alias_dir = '-PAE'
+        else:
+            alias_dir = ''
+
         self.modaliases = [
-            '/usr/share/jockey/modaliases/',
+            '/usr/share/jockey/modaliases%s/' % alias_dir,
         ]
 
         # path to X.org configuration file
@@ -101,11 +111,6 @@ class OSLib:
         # slow:
         #self.gpg_key_server = 'keys.gnupg.net'
         self.gpg_key_server = 'hkp://keyserver.ubuntu.com:80'
-
-        if target_kernel:
-            self.target_kernel = target_kernel
-        else:
-            self.target_kernel = os.uname()[2]
 
         # Package which provides include files for the currently running
         # kernel.  If the system ensures that kernel headers are always

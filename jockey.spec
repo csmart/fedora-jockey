@@ -4,7 +4,7 @@
 
 Name:           jockey
 Version:        %{jockey_version}
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Jockey driver manager
 
 License:        GPLv2+
@@ -186,6 +186,9 @@ fi
 %{_datadir}/selinux/*/%{name}.pp
 
 %changelog
+* Sun Oct 16 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.3-3
+- Add initial PAE kernel module installation support
+
 * Thu Aug 18 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.3-2
 - jockey should depend on xkit, not jockey-gtk
 
