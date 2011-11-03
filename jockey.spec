@@ -14,7 +14,7 @@ Source1:        fedora-%{name}-%{version}.tar.bz2
 Patch0:         jockey-0.9.3-gtkwidthfix.patch
 
 BuildArch:      noarch 
-BuildRequires:  python2-devel python-distutils-extra gettext
+BuildRequires:  python2-devel python-distutils-extra gettext intltool
 Requires:       dbus-python polkit PackageKit python-xkit parsidora-modaliases
 
 %description
