@@ -56,7 +56,7 @@ Version:        1.0.0
 BuildRequires:  checkpolicy selinux-policy-devel hardlink
 BuildRequires:  /usr/share/selinux/devel/policyhelp
 Requires:       %{name} = %{jockey_version}-%{release}
-Requires:       selinux-policy >= %{selinux_policyver}
+Requires:       selinux-policy >= %{selinux_policyver} selinux-policy-targeted
 Requires(post):   /usr/sbin/semodule
 Requires(postun): /usr/sbin/semodule
 
