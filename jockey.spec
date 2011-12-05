@@ -92,6 +92,11 @@ cd -
 rm -r %{buildroot}%{_datadir}/doc
 mkdir -p %{buildroot}%{_var}/cache/%{name}
 
+# Install config file
+mkdir -p %{buildroot}%{_sysconfdir}
+install -p -m 644 fedora-%{name}-%{version}/config/%{name}.conf \
+      %{buildroot}%{_sysconfdir}/
+
 # Move autostart files to the new place
 mkdir -p %{buildroot}%{_sysconfdir}/xdg/autostart/
 mv %{buildroot}%{_datadir}/autostart/* %{buildroot}%{_sysconfdir}/xdg/autostart/
@@ -151,6 +156,7 @@ fi
 
 %files -f %{name}.lang
 %doc AUTHORS ChangeLog COPYING README.txt
+%config %{_sysconfdir}/%{name}.conf
 %{_bindir}/jockey-text
 %{python_sitelib}/*
 %{_datadir}/%{name}/%{name}-backend
@@ -184,8 +190,11 @@ fi
 
 %changelog
 * Tue Dec 06 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.5-1
-- Update to upstream version 0.9.5
 - Remove separate versioning for -selinux subpackage
+
+* Mon Dec 05 2011 Chris Smart <chris@kororaa.org> - 0.9.5-1
+- Update to upstream version 0.9.5
+- Added support for akmods (where available), if enabled in Jockey config file.
 
 * Sun Oct 16 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.3-3
 - Add initial PAE kernel module installation support

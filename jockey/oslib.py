@@ -42,6 +42,9 @@ class OSLib:
         # relevant stuff for clients and backend
         self._get_os_version()
 
+        # location of config file
+        self.config_file = '/etc/jockey.conf'
+
         # /sys/ path; the main purpose of changing this is for test
         # suites, but some vendors might have /sys in a nonstandard place
         self.sys_dir = '/sys'
@@ -77,11 +80,19 @@ class OSLib:
         # default paths to modalias files (directory entries will consider all
         # files in them)
 
+# Enable akmods if set in config, else check PAE, fallback to kmod
 #            '/lib/modules/%s/modules.alias' % os.uname()[2],
-        if re.search('.*PAE.*', self.target_kernel):
-            alias_dir = '-PAE'
-        else:
-            alias_dir = ''
+        conf_file = open(self.config_file)
+
+        for line in conf_file:
+	    if "akmods=true" in line:
+	        alias_dir = '-akmods'
+            elif re.search('.*PAE.*', self.target_kernel):
+                alias_dir = '-PAE'
+            else:
+                alias_dir = ''
+
+        conf_file.close()
 
         self.modaliases = [
             '/usr/share/jockey/modaliases%s/' % alias_dir,
