@@ -1,10 +1,9 @@
-%global jockey_version 0.9.3
 %global selinux_variants mls targeted
 %global selinux_policyver %(%{__sed} -e 's,.*selinux-policy-\\([^/]*\\)/.*,\\1,' /usr/share/selinux/devel/policyhelp || echo 0.0.0)
 
 Name:           jockey
-Version:        %{jockey_version}
-Release:        3%{?dist}
+Version:        0.9.5
+Release:        1%{?dist}
 Summary:        Jockey driver manager
 
 License:        GPLv2+
@@ -52,10 +51,9 @@ command line).
 
 %package selinux
 Summary:        SELinux module for Jockey driver manager
-Version:        1.0.0
 BuildRequires:  checkpolicy selinux-policy-devel hardlink
 BuildRequires:  /usr/share/selinux/devel/policyhelp
-Requires:       %{name} = %{jockey_version}-%{release}
+Requires:       %{name}
 Requires:       selinux-policy >= %{selinux_policyver} selinux-policy-targeted
 Requires(post):   /usr/sbin/semodule
 Requires(postun): /usr/sbin/semodule
@@ -65,8 +63,6 @@ This package provides an SELinux module for Jockey driver manager.
 You should install this package if you are using SELinux, so that Jockey
 can be run in enforcing mode.
 
-%global version %{jockey_version}
-
 %prep
 %setup -q -a 1
 %patch0 -p1 -b .gtkwidthfix
@@ -75,6 +71,7 @@ sed -i.execfix "s|'|\"|g" gtk/autostart/jockey-gtk.desktop.in \
 sed -i.trayfix "s|if indicator:|if indicator or trayicon:|" gtk/jockey-gtk
 sed -i.nocert "s|'repository' not in|'repository' in|" jockey/ui.py
 sed -i.noblacklist "s|do_blacklist=True|do_blacklist=False|" jockey/handlers.py
+sed -i.catfix "s|HardwareSettings|HardwareSettings;|" gtk/jockey-gtk.desktop.in
 cp fedora-%{name}-%{version}/%{name}/* %{name}/
 
 %build
@@ -186,6 +183,10 @@ fi
 %{_datadir}/selinux/*/%{name}.pp
 
 %changelog
+* Tue Dec 06 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.5-1
+- Update to upstream version 0.9.5
+- Remove separate versioning for -selinux subpackage
+
 * Sun Oct 16 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.3-3
 - Add initial PAE kernel module installation support
 
