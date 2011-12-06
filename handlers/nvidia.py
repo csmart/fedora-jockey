@@ -37,7 +37,8 @@ class NvidiaDriver(KernelModuleHandler):
     def recommended(self):
         if self._recommended == None:
             self._recommended = self.package == "kmod-nvidia" or \
-                self.package == "kmod-nvidia-PAE"
+                self.package == "kmod-nvidia-PAE" or \
+                self.package == "akmod-nvidia"
         return self._recommended
 
     def disable(self):

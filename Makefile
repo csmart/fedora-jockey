@@ -1,7 +1,7 @@
 NAME = fedora-jockey
 
 all:
-VERSION := $(shell awk '/%global jockey_version/ { print $$3 }' jockey.spec)
+VERSION := $(shell awk '/Version:/ { print $$2 }' jockey.spec)
 RELEASE := $(shell awk '/Release:/ { print $$2 }' jockey.spec | sed 's|%{?dist}||g')
 TAG=$(NAME)-$(VERSION)-$(RELEASE)
 

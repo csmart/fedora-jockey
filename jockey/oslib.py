@@ -80,8 +80,8 @@ class OSLib:
         # default paths to modalias files (directory entries will consider all
         # files in them)
 
-# Enable akmods if set in config, else check PAE, fallback to kmod
-#            '/lib/modules/%s/modules.alias' % os.uname()[2],
+        # Enable akmods if set in config, else check PAE, fallback to kmod
+        # old line: '/lib/modules/%s/modules.alias' % os.uname()[2],
         conf_file = open(self.config_file)
 
         for line in conf_file:
