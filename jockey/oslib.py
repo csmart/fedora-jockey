@@ -81,7 +81,6 @@ class OSLib:
         # files in them)
 
         # Enable akmods if set in config, else check PAE, fallback to kmod
-        # old line: '/lib/modules/%s/modules.alias' % os.uname()[2],
         conf_file = open(self.config_file)
 
         for line in conf_file:
@@ -154,6 +153,7 @@ class OSLib:
 
     def package_installed(self, package):
         '''Return if the given package is installed.'''
+
         pkcon = subprocess.Popen(['pkcon', 'resolve', package],
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out = pkcon.communicate()[0]
@@ -218,7 +218,8 @@ class OSLib:
         that the repository is signed with that key.
 
         An unknown package should raise a ValueError. Any installation failure
-        should be raised as a SystemError.
+        due to bad packages should be logged, but not raise an exception, as
+        this would just crash the backend.
         '''
         if repository or fingerprint:
             raise NotImplementedError('PackageKit default implementation does not currently support repositories or fingerprints')
@@ -260,7 +261,7 @@ class OSLib:
 
         err += pkcon.stderr.read()
         if pkcon.wait() != 0 or not self.package_installed(package):
-            raise SystemError('package %s failed to install: %s' % (package, err)) 
+            logging.error('package %s failed to install: %s' % (package, err))
             
     def queue_packages_for_removal(self, packages):
         self.remove_pkg_queue.update(packages)
