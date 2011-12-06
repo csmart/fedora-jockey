@@ -14,7 +14,7 @@ Patch0:         jockey-0.9.3-gtkwidthfix.patch
 
 BuildArch:      noarch 
 BuildRequires:  python2-devel python-distutils-extra gettext intltool
-Requires:       dbus-python polkit PackageKit python-xkit parsidora-modaliases
+Requires:       dbus-python polkit PackageKit python-xkit jockey-modaliases
 
 %description
 Jockey provides an user interface and desktop integration for installation 
