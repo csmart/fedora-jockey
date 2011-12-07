@@ -3,7 +3,7 @@
 
 Name:           jockey
 Version:        0.9.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Jockey driver manager
 
 License:        GPLv2+
@@ -51,6 +51,7 @@ command line).
 
 %package selinux
 Summary:        SELinux module for Jockey driver manager
+Epoch:          1
 BuildRequires:  checkpolicy selinux-policy-devel hardlink
 BuildRequires:  /usr/share/selinux/devel/policyhelp
 Requires:       %{name}
@@ -189,6 +190,9 @@ fi
 %{_datadir}/selinux/*/%{name}.pp
 
 %changelog
+* Wed Dec 07 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.5-2
+- Add an Epoch for jockey-selinux to resolve versioning inconsistency
+
 * Tue Dec 06 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.5-1
 - Remove separate versioning for -selinux subpackage
 
