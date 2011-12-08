@@ -2,8 +2,8 @@
 %global selinux_policyver %(%{__sed} -e 's,.*selinux-policy-\\([^/]*\\)/.*,\\1,' /usr/share/selinux/devel/policyhelp || echo 0.0.0)
 
 Name:           jockey
-Version:        0.9.5
-Release:        2%{?dist}
+Version:        0.9.6
+Release:        1%{?dist}
 Summary:        Jockey driver manager
 
 License:        GPLv2+
@@ -67,12 +67,9 @@ can be run in enforcing mode.
 %prep
 %setup -q -a 1
 %patch0 -p1 -b .gtkwidthfix
-sed -i.execfix "s|'|\"|g" gtk/autostart/jockey-gtk.desktop.in \
-         kde/autostart/jockey-kde.desktop.in
 sed -i.trayfix "s|if indicator:|if indicator or trayicon:|" gtk/jockey-gtk
 sed -i.nocert "s|'repository' not in|'repository' in|" jockey/ui.py
 sed -i.noblacklist "s|do_blacklist=True|do_blacklist=False|" jockey/handlers.py
-sed -i.catfix "s|HardwareSettings|HardwareSettings;|" gtk/jockey-gtk.desktop.in
 cp fedora-%{name}-%{version}/%{name}/* %{name}/
 
 %build
@@ -190,6 +187,9 @@ fi
 %{_datadir}/selinux/*/%{name}.pp
 
 %changelog
+* Thu Dec 08 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.6-1
+- Updated to latest upstream version 0.9.6
+
 * Wed Dec 07 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.5-2
 - Add an Epoch for jockey-selinux to resolve versioning inconsistency
 
