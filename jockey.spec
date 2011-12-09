@@ -3,7 +3,7 @@
 
 Name:           jockey
 Version:        0.9.6
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Jockey driver manager
 
 License:        GPLv2+
@@ -26,7 +26,7 @@ command line).
 Summary:        GTK front-end for Jockey driver manager
 Requires:       %{name} = %{version}-%{release}
 Requires:       dbus-python polkit-gnome gdk-pixbuf2 gtk3 
-Requires:       gobject-introspection libnotify
+Requires:       gobject-introspection libnotify pygobject3
 
 %description gtk
 This package provides a GTK interface for Jockey.
@@ -40,6 +40,7 @@ command line).
 Summary:        KDE front-end for Jockey driver manager
 Requires:       %{name} = %{version}-%{release}
 Requires:       dbus-python polkit-kde PyQt4 PyKDE4
+Requires:       pygobject3
 
 %description kde
 This package provides a KDE interface for Jockey.
@@ -187,6 +188,9 @@ fi
 %{_datadir}/selinux/*/%{name}.pp
 
 %changelog
+* Fri Dec 09 2011 Chris Smart <chris@kororaa.org> - 0.9.6-2
+- Added pygobject3 to list of runtime dependencies, fixes breakage on KDE
+
 * Thu Dec 08 2011 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.6-1
 - Updated to latest upstream version 0.9.6
 
