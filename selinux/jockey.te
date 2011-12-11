@@ -1,9 +1,13 @@
 
 module jockey 1.0.0;
 
+
+
 require {
 	type insmod_exec_t;
+	type initrc_tmp_t;
 	type lib_t;
+        type ldconfig_t;
 	type var_log_t;
 	type usr_t;
 	type modules_conf_t;
@@ -17,6 +21,7 @@ require {
 	class dbus send_msg;
 	class dir { write getattr read remove_name create add_name };
 	class file { execute read lock create execute_no_trans write getattr unlink open };
+        class lnk_file read;
 }
 
 #============= system_dbusd_t ==============
@@ -58,3 +63,14 @@ allow system_dbusd_t var_t:dir remove_name;
 allow system_dbusd_t var_t:file unlink;
 allow system_dbusd_t self:capability sys_module;
 allow system_dbusd_t modules_object_t:file { read open };
+
+# allow ldconfig to write
+#!!!! The source type 'ldconfig_t' can write to a 'dir' of the following types:
+# ldconfig_cache_t, lib_t, tmp_t, etc_t, user_tmp_t, rpm_script_tmp_t, user_home_t, ld_so_cache_t, ldconfig_tmp_t
+
+allow ldconfig_t initrc_tmp_t:dir { read write };
+#!!!! This avc is allowed in the current policy
+
+allow ldconfig_t initrc_tmp_t:lnk_file read;
+~                                                                                                                                                                       
+~                                                                                                                                                                       
