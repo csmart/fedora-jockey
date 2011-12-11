@@ -134,6 +134,10 @@ class OSLib:
     # work for your distribution, they must be reimplemented
     #
 
+    def update_initramfs():
+	dracut = subprocess.Popen(['/sbin/dracut', '--force'],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
     def is_package_free(self, package):
         '''Return if given package is free software.'''
 
@@ -262,6 +266,8 @@ class OSLib:
         err += pkcon.stderr.read()
         if pkcon.wait() != 0 or not self.package_installed(package):
             logging.error('package %s failed to install: %s' % (package, err))
+
+        update_initramfs()
             
     def queue_packages_for_removal(self, packages):
         self.remove_pkg_queue.update(packages)
@@ -322,6 +328,8 @@ class OSLib:
 
         if self.package_installed(package):
             raise SystemError('package %s failed to remove: %s' % (package, err)) 
+
+        update_initramfs()
 
     def remove_single_package(self, package, progress_cb, progress_start,
                               progress_total):
