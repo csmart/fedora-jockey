@@ -19,13 +19,9 @@ class NvidiaDriver(KernelModuleHandler):
             description=_('3D-accelerated proprietary graphics driver for '
                 'NVIDIA cards.'),
             rationale=_('This driver is required to fully utilise '
-                'the 3D potential of NVIDIA graphics cards, as well as provide '
-                '2D acceleration of newer cards.\n\n'
-                'If you wish to enable desktop effects, this driver is '
-                'required.\n\n'
-                'If this driver is not enabled, you will not be able to '
-                'enable desktop effects and will not be able to run software '
-                'that requires 3D acceleration, such as some games.'))
+                'the 3D potential of NVIDIA based graphics cards.\n\n'
+                'If the default open source Nouveau driver is not be able '
+		'to power some 3D games, you can try this driver instead.'))
         self._recommended = None
 
     def id(self):
