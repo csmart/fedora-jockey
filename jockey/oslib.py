@@ -28,7 +28,7 @@ class OSLib:
 
     def __init__(self, client_only=False, target_kernel=None):
         '''Set default paths and load the module blacklist.
-        
+
         Distributors might want to override some default paths.
         If client_only is True, this only initializes functionality which is
         needed by clients, and which can be done without special privileges.
@@ -80,16 +80,20 @@ class OSLib:
         # default paths to modalias files (directory entries will consider all
         # files in them)
 
+        # set akmod support to disabled by default, enabled below after reading config file
+        self.akmods_enabled = False
+
         # Enable akmods if set in config, else check PAE, fallback to kmod
         conf_file = open(self.config_file)
 
         for line in conf_file:
-	    if "akmods=true" in line:
-	        alias_dir = '-akmods'
-            elif re.search('.*PAE.*', self.target_kernel):
-                alias_dir = '-PAE'
-            else:
-                alias_dir = ''
+		if "akmods=true" in line:
+		  alias_dir = '-akmods'
+		  self.akmods_enabled = True
+		elif re.search('.*PAE.*', self.target_kernel):
+		  alias_dir = '-PAE'
+		else:
+		  alias_dir = ''
 
         conf_file.close()
 
@@ -129,22 +133,67 @@ class OSLib:
         # use self.target_kernel instead of os.uname()[2].
         self.kernel_header_package = None
 
-    # 
+    #
     # The following package related functions use PackageKit; if that does not
     # work for your distribution, they must be reimplemented
     #
 
-    def update_initramfs(self):
-	dracut = subprocess.Popen(['/sbin/dracut', '--force'],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def rebuild_initramfs(self, progress_cb, phase):
+        phase = phase
+
+        if progress_cb and phase == "remove":
+            progress_cb(0, 100)
+        else:
+            progress_cb(phase, 0, 100)
+
+        dracut = subprocess.Popen(['/sbin/dracut', '--force', '-v'],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+
+        err = line = ''
+        fail = False
+
+        while dracut.poll() == None or line != '':
+            line = dracut.stderr.readline()
+            if fail:
+                err += line
+            if progress_cb:
+                if 'Installing' in line:
+                    if phase == "remove":
+                        progress_cb(25, 100)
+                    else:
+                        progress_cb(phase, 25, 100)
+                elif '/tmp/initramfs' in line:
+                    if phase == "remove":
+                        progress_cb(25, 100)
+                    else:
+                        progress_cb(phase, 25, 100)
+                elif 'total' in line:
+                    if phase == "remove":
+                        progress_cb(25, 100)
+                    else:
+                        progress_cb(phase, 25, 100)
+                elif 'Wrote' in line:
+                    if phase == "remove":
+                        progress_cb(25, 100)
+                    else:
+                        progress_cb(phase, 25, 100)
+            if 'WARNING' in line:
+                fail = True
+            elif 'failed' in line:
+                err += line
+
+            err += dracut.stderr.read()
+            if dracut.wait() != 0:
+                logging.error('Failed to rebuild initramfs: %s' % (err))
 
     def is_package_free(self, package):
         '''Return if given package is free software.'''
 
-        pkcon = subprocess.Popen(['pkcon', '--filter=newest', 
-            'get-details', package], stdin=subprocess.PIPE, 
+        pkcon = subprocess.Popen(['pkcon', '--filter=newest',
+            'get-details', package], stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # we send an "1" to select package if several versions 
+        # we send an "1" to select package if several versions
         # are available (--filter is broken in at least Fedora 10)
         out = pkcon.communicate('1\n')[0]
         m = re.search("^\s*license:\s*'?(.*)'?$", out, re.M)
@@ -165,13 +214,13 @@ class OSLib:
 
     def package_description(self, package):
         '''Return a tuple (short_description, long_description) for a package.
-        
+
         This should raise a ValueError if the package is not available.
         '''
-        pkcon = subprocess.Popen(['pkcon', '--filter=newest', 
-            'get-details', package], stdin=subprocess.PIPE, 
+        pkcon = subprocess.Popen(['pkcon', '--filter=newest',
+            'get-details', package], stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # we send an "1" to select package if several versions 
+        # we send an "1" to select package if several versions
         # are available (--filter is broken in at least Fedora 10)
         out = pkcon.communicate('1\n')[0]
         m = re.search("^\s*description:\s*'?(.*?)'?^\s+", out, re.M | re.S)
@@ -183,13 +232,13 @@ class OSLib:
 
     def package_files(self, package):
         '''Return a list of files shipped by a package.
-        
+
         This should raise a ValueError if the package is not installed.
         '''
-        pkcon = subprocess.Popen(['pkcon', '--filter=installed', 
-            'get-files', package], stdin=subprocess.PIPE, 
+        pkcon = subprocess.Popen(['pkcon', '--filter=installed',
+            'get-files', package], stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # we send an "1" to select package if several versions 
+        # we send an "1" to select package if several versions
         # are available (--filter is broken in at least Fedora 10)
         out = pkcon.communicate('1\n')[0]
         if pkcon.returncode == 0 and '\n  ' in out:
@@ -267,8 +316,8 @@ class OSLib:
         if pkcon.wait() != 0 or not self.package_installed(package):
             logging.error('package %s failed to install: %s' % (package, err))
 
-        self.update_initramfs()
-            
+        self.rebuild_initramfs(progress_cb, phase)
+
     def queue_packages_for_removal(self, packages):
         self.remove_pkg_queue.update(packages)
 
@@ -327,9 +376,9 @@ class OSLib:
             progress_start += 100
 
         if self.package_installed(package):
-            raise SystemError('package %s failed to remove: %s' % (package, err)) 
+            raise SystemError('package %s failed to remove: %s' % (package, err))
 
-        self.update_initramfs()
+        self.rebuild_initramfs(progress_cb, phase)
 
     def remove_single_package(self, package, progress_cb, progress_start,
                               progress_total):
@@ -370,7 +419,7 @@ class OSLib:
         err += pkcon.stderr.read()
         pkcon.wait()
         if self.package_installed(package):
-            raise SystemError('package %s failed to remove: %s' % (package, err)) 
+            raise SystemError('package %s failed to remove: %s' % (package, err))
 
     def has_repositories(self):
         '''Check if package repositories are available.
@@ -439,9 +488,9 @@ class OSLib:
             # the fingerprint
             gpg = subprocess.Popen(['gpg', '--homedir', gpghome,
                 '--no-default-keyring', '--primary-keyring', default_keyring,
-                '--keyserver', self.gpg_key_server, '--recv-key', keyid], 
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
-                env={'PATH': os.environ.get('PATH', ''), 
+                '--keyserver', self.gpg_key_server, '--recv-key', keyid],
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                env={'PATH': os.environ.get('PATH', ''),
                      'http_proxy': os.environ.get('http_proxy', '')})
             (out, err) = gpg.communicate()
 
@@ -454,7 +503,7 @@ class OSLib:
             # allow that; fortunately key ID conflicts are very rare.
             gpg = subprocess.Popen(['gpg', '--homedir', gpghome,
                 '--no-default-keyring', '--primary-keyring', keyring,
-                '--import', default_keyring], 
+                '--import', default_keyring],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                 env={'PATH': os.environ.get('PATH', '')})
             (out, err) = gpg.communicate()
@@ -495,7 +544,7 @@ class OSLib:
         finally:
             shutil.rmtree(gpghome)
 
-    # 
+    #
     # The following functions MUST be implemented by distributors
     # Note that apt and yum PackageKit backends currently do not implement
     # RepoSetData(), so those need to remain package system specific
@@ -523,14 +572,14 @@ class OSLib:
         '''
         pass
 
-    # 
+    #
     # The following functions have a reasonable default implementation for
     # Linux, but can be tweaked by distributors
     #
 
     def set_backup_dir(self):
         '''Setup self.backup_dir, directory where backup files are stored.
-        
+
         This is used for old xorg.conf, DriverDB caches, etc.
         '''
         self.backup_dir = '/var/cache/jockey'
@@ -551,7 +600,7 @@ class OSLib:
         program.  Since this will include the large majority of existing kernel
         modules, implementing this is also important for speed reasons; without
         it, detecting existing modules will take quite long.
-        
+
         Note that modules which are ignored here, but covered by a custom
         handler will still be considered.
         '''
@@ -565,7 +614,7 @@ class OSLib:
 
     def blacklist_module(self, module, blacklist):
         '''Add or remove a kernel module from the modprobe blacklist.
-        
+
         If blacklist is True, the module is blacklisted, otherwise it is
         removed from the blacklist.
         '''
@@ -706,7 +755,7 @@ class OSLib:
 
     def ssl_cert_file(self):
         '''Get file with trusted SSL certificates.
-        
+
         This is used for downloading GPG key fingerprints for
         openprinting.org driver packages.
 
@@ -745,7 +794,7 @@ class OSLib:
         method returns the currently expected video driver ABI from the X
         server. If it is not None, it must match video_driver_abi() of a driver
         package for this driver to be offered for installation.
-        
+
         If this returns None, ABI checking is disabled.
         '''
         return None
@@ -758,7 +807,7 @@ class OSLib:
         method returns the video ABI for a driver package. If it is not None,
         it must match current_xorg_video_abi() for this driver to be offered
         for installation.
-        
+
         If this returns None, ABI checking is disabled.
         '''
         return None
