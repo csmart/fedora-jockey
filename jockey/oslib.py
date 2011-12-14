@@ -87,13 +87,13 @@ class OSLib:
         conf_file = open(self.config_file)
 
         for line in conf_file:
-		if "akmods=true" in line:
-		  alias_dir = '-akmods'
-		  self.akmods_enabled = True
-		elif re.search('.*PAE.*', self.target_kernel):
-		  alias_dir = '-PAE'
-		else:
-		  alias_dir = ''
+            if "akmods=true" in line:
+                alias_dir = '-akmods'
+                self.akmods_enabled = True
+            elif re.search('.*PAE.*', self.target_kernel):
+                alias_dir = '-PAE'
+            else:
+                alias_dir = ''
 
         conf_file.close()
 
@@ -134,58 +134,30 @@ class OSLib:
         self.kernel_header_package = None
 
     #
-    # The following package related functions use PackageKit; if that does not
-    # work for your distribution, they must be reimplemented
+    # The following functions are Fedora specific
     #
 
     def rebuild_initramfs(self, progress_cb, phase):
+        '''Rebuild the initramfs.'''
+
         phase = phase
 
         if progress_cb and phase == "remove":
-            progress_cb(0, 100)
+            progress_cb(-1, -1)
         else:
-            progress_cb(phase, 0, 100)
+            progress_cb(phase, -1, -1)
 
         dracut = subprocess.Popen(['/sbin/dracut', '--force', '-v'],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
 
-        err = line = ''
-        fail = False
+        if dracut.wait() != 0:
+            logging.error('Failed to rebuild initramfs: %s' % (err))
 
-        while dracut.poll() == None or line != '':
-            line = dracut.stderr.readline()
-            if fail:
-                err += line
-            if progress_cb:
-                if 'Installing' in line:
-                    if phase == "remove":
-                        progress_cb(25, 100)
-                    else:
-                        progress_cb(phase, 25, 100)
-                elif '/tmp/initramfs' in line:
-                    if phase == "remove":
-                        progress_cb(25, 100)
-                    else:
-                        progress_cb(phase, 25, 100)
-                elif 'total' in line:
-                    if phase == "remove":
-                        progress_cb(25, 100)
-                    else:
-                        progress_cb(phase, 25, 100)
-                elif 'Wrote' in line:
-                    if phase == "remove":
-                        progress_cb(25, 100)
-                    else:
-                        progress_cb(phase, 25, 100)
-            if 'WARNING' in line:
-                fail = True
-            elif 'failed' in line:
-                err += line
-
-            err += dracut.stderr.read()
-            if dracut.wait() != 0:
-                logging.error('Failed to rebuild initramfs: %s' % (err))
+    #
+    # The following package related functions use PackageKit; if that does not
+    # work for your distribution, they must be reimplemented
+    #
 
     def is_package_free(self, package):
         '''Return if given package is free software.'''
@@ -378,7 +350,7 @@ class OSLib:
         if self.package_installed(package):
             raise SystemError('package %s failed to remove: %s' % (package, err))
 
-        self.rebuild_initramfs(progress_cb, phase)
+        self.rebuild_initramfs(progress_cb, "remove")
 
     def remove_single_package(self, package, progress_cb, progress_start,
                               progress_total):
