@@ -154,13 +154,19 @@ class OSLib:
         '''Build kmod package.'''
 
         phase = phase
+        err = ''
 
         progress_cb(phase, -1, -1)
+
+        logging.debug('\n\n\nbuild_kmod\n\n\n')
+        time.sleep(60)
 
         kernel_version = os.uname()[2]
         akmods = subprocess.Popen(['/usr/sbin/akmods', '--kernels', 'kernel_version'],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
+
+        err += akmods.stderr.read()
 
         if akmods.wait() != 0:
             logging.error('Failed to build kmod: %s' % (err))
@@ -169,23 +175,21 @@ class OSLib:
         '''Rebuild the initramfs.'''
 
         phase = phase
+        err = ''
 
         if progress_cb and phase == "remove":
             progress_cb(-1, -1)
         else:
             progress_cb(phase, -1, -1)
 
-#        kernel_version = os.uname()[2]
-#        akmods = subprocess.Popen(['/usr/sbin/akmods', '--kernels', 'kernel_version'],
-#            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-#            stderr=subprocess.PIPE)
-#
-#        if akmods.wait() != 0:
-#            logging.error('Failed to build kmod: %s' % (err))
+        logging.debug('\n\n\nbuild_initramfs\n\n\n')
+        time.sleep(60)
 
         dracut = subprocess.Popen(['/sbin/dracut', '--force', '-v'],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
+
+        err += dracut.stderr.read()
 
         if dracut.wait() != 0:
             logging.error('Failed to rebuild initramfs: %s' % (err))
