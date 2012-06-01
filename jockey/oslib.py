@@ -159,10 +159,10 @@ class OSLib:
         progress_cb(phase, -1, -1)
 
         logging.debug('\n\n\nbuild_kmod\n\n\n')
-        time.sleep(60)
+        time.sleep(30)
 
         kernel_version = os.uname()[2]
-        akmods = subprocess.Popen(['/usr/sbin/akmods', '--kernels', 'kernel_version'],
+        akmods = subprocess.Popen(['/usr/sbin/akmods', '--kernels', kernel_version],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
 
@@ -170,6 +170,9 @@ class OSLib:
 
         if akmods.wait() != 0:
             logging.error('Failed to build kmod: %s' % (err))
+        else:
+            logging.debug('Successfully built kmod for kernel %s' % kernel_version)
+
 
     def rebuild_initramfs(self, progress_cb, phase):
         '''Rebuild the initramfs.'''
@@ -183,7 +186,7 @@ class OSLib:
             progress_cb(phase, -1, -1)
 
         logging.debug('\n\n\nbuild_initramfs\n\n\n')
-        time.sleep(60)
+        time.sleep(30)
 
         dracut = subprocess.Popen(['/sbin/dracut', '--force', '-v'],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
@@ -193,6 +196,8 @@ class OSLib:
 
         if dracut.wait() != 0:
             logging.error('Failed to rebuild initramfs: %s' % (err))
+        else:
+            logging.debug('Successfully rebuilt initramfs')
 
     #
     # The following package related functions use PackageKit; if that does not
