@@ -20,7 +20,7 @@ class Staging_r8192u_usb_Driver(KernelModuleHandler):
                     'You probably only want to enable this if '
                     'your hardware does not work at all.\n\n'
                     'These are drivers which are not yet in the '
-                    'stable kernel tree, but due to be merged soon.))
+                    'stable kernel tree, but due to be merged soon.'))
 
     def id(self):
         '''Return an unique identifier of the handler.'''
