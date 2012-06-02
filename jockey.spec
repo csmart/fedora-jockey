@@ -188,7 +188,7 @@ fi
 
 %changelog
 * Wed May 30 2012 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.7-1
-- Updated to jockey 1.9.7
+- Updated to jockey 0.9.7
 
 * Fri Dec 09 2011 Chris Smart <chris@kororaa.org> - 0.9.6-2
 - Added pygobject3 to list of runtime dependencies, fixes breakage on KDE
