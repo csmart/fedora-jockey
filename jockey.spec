@@ -2,8 +2,8 @@
 %global selinux_policyver %(%{__sed} -e 's,.*selinux-policy-\\([^/]*\\)/.*,\\1,' /usr/share/selinux/devel/policyhelp || echo 0.0.0)
 
 Name:           jockey
-Version:        0.9.6
-Release:        2%{?dist}
+Version:        0.9.7
+Release:        1%{?dist}
 Summary:        Jockey driver manager
 
 License:        GPLv2+
@@ -68,7 +68,6 @@ can be run in enforcing mode.
 %prep
 %setup -q -a 1
 %patch0 -p1 -b .gtkwidthfix
-sed -i.trayfix "s|if indicator:|if indicator or trayicon:|" gtk/jockey-gtk
 sed -i.nocert "s|'repository' not in|'repository' in|" jockey/ui.py
 sed -i.noblacklist "s|do_blacklist=True|do_blacklist=False|" jockey/handlers.py
 cp fedora-%{name}-%{version}/%{name}/* %{name}/
@@ -188,6 +187,9 @@ fi
 %{_datadir}/selinux/*/%{name}.pp
 
 %changelog
+* Wed May 30 2012 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.7-1
+- Updated to jockey 1.9.7
+
 * Fri Dec 09 2011 Chris Smart <chris@kororaa.org> - 0.9.6-2
 - Added pygobject3 to list of runtime dependencies, fixes breakage on KDE
 
