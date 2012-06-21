@@ -20,11 +20,18 @@
 import fcntl, os, subprocess, sys, logging, re, tempfile, time, shutil
 from glob import glob
 
+# global variables
+akmods_enabled = False
+
 class OSLib:
     '''Encapsulation of operating system/Linux distribution specific operations.'''
 
     # global default instance
     inst = None
+
+    global akmods_enabled
+    #logging.debug('class akmod status: %s', akmods_enabled)
+    print("class akmod status: %s" % akmods_enabled)
 
     def __init__(self, client_only=False, target_kernel=None):
         '''Set default paths and load the module blacklist.
@@ -37,6 +44,10 @@ class OSLib:
         os.uname()[2]. This is primarily useful for distribution installers
         where the target system kernel differs from the installer kernel.
         '''
+
+        global akmods_enabled
+        logging.debug('init akmod status pre-config: %s', akmods_enabled)
+
         self.remove_pkg_queue = set()
 
         # relevant stuff for clients and backend
@@ -81,21 +92,23 @@ class OSLib:
         # files in them)
 
         # set akmod support to disabled by default, enabled below after reading config file
-        self.akmods_enabled = False
+        #self.akmods_enabled = False
 
         # Enable akmods if set in config, else check PAE, fallback to kmod
         conf_file = open(self.config_file)
 
         for line in conf_file:
-            if "akmods=true" in line:
+            if "akmods=true" in line.lower():
                 alias_dir = '-akmods'
-                self.akmods_enabled = True
+                akmods_enabled = True
             elif re.search('.*PAE.*', self.target_kernel):
                 alias_dir = '-PAE'
             else:
                 alias_dir = ''
 
         conf_file.close()
+
+        logging.debug('init akmod status post-config: %s', akmods_enabled)
 
         self.modaliases = [
             '/usr/share/jockey/modaliases%s/' % alias_dir,
@@ -137,22 +150,54 @@ class OSLib:
     # The following functions are Fedora specific
     #
 
+    def build_kmod(self, progress_cb, phase):
+        '''Build kmod package.'''
+
+        phase = phase
+        err = ''
+
+        progress_cb(phase, -1, -1)
+
+        logging.debug('\n\n\nbuild_kmod\n\n\n')
+        time.sleep(30)
+
+        kernel_version = os.uname()[2]
+        akmods = subprocess.Popen(['/usr/sbin/akmods', '--kernels', kernel_version],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+
+        err += akmods.stderr.read()
+
+        if akmods.wait() != 0:
+            logging.error('Failed to build kmod: %s' % (err))
+        else:
+            logging.debug('Successfully built kmod for kernel %s' % kernel_version)
+
+
     def rebuild_initramfs(self, progress_cb, phase):
         '''Rebuild the initramfs.'''
 
         phase = phase
+        err = ''
 
         if progress_cb and phase == "remove":
             progress_cb(-1, -1)
         else:
             progress_cb(phase, -1, -1)
 
+        logging.debug('\n\n\nbuild_initramfs\n\n\n')
+        time.sleep(30)
+
         dracut = subprocess.Popen(['/sbin/dracut', '--force', '-v'],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
 
+        err += dracut.stderr.read()
+
         if dracut.wait() != 0:
             logging.error('Failed to rebuild initramfs: %s' % (err))
+        else:
+            logging.debug('Successfully rebuilt initramfs')
 
     #
     # The following package related functions use PackageKit; if that does not
@@ -246,6 +291,11 @@ class OSLib:
         due to bad packages should be logged, but not raise an exception, as
         this would just crash the backend.
         '''
+
+        global akmods_enabled
+        logging.debug('install_package akmod status: %s', akmods_enabled)
+        print("install_package akmod status: %s" % akmods_enabled)
+
         if repository or fingerprint:
             raise NotImplementedError('PackageKit default implementation does not currently support repositories or fingerprints')
 
@@ -287,6 +337,10 @@ class OSLib:
         err += pkcon.stderr.read()
         if pkcon.wait() != 0 or not self.package_installed(package):
             logging.error('package %s failed to install: %s' % (package, err))
+
+
+        if akmods_enabled:
+          self.build_kmod(progress_cb, phase)
 
         self.rebuild_initramfs(progress_cb, phase)
 
