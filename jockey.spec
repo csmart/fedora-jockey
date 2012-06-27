@@ -3,7 +3,7 @@
 
 Name:           jockey
 Version:        0.9.7
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Jockey driver manager
 
 License:        GPLv2+
@@ -12,7 +12,7 @@ Source0:        http://launchpad.net/jockey/trunk/%{version}/+download/%{name}-%
 Source1:        fedora-%{name}-%{version}.tar.bz2
 Patch0:         jockey-0.9.3-gtkwidthfix.patch
 
-BuildArch:      noarch 
+BuildArch:      noarch
 BuildRequires:  python2-devel python-distutils-extra gettext intltool
 Requires:       dbus-python polkit PackageKit python-xkit jockey-modaliases
 
@@ -53,7 +53,7 @@ command line).
 %package selinux
 Summary:        SELinux module for Jockey driver manager
 Epoch:          1
-BuildRequires:  checkpolicy selinux-policy-devel hardlink
+BuildRequires:  checkpolicy selinux-policy selinux-policy-devel hardlink
 BuildRequires:  /usr/share/selinux/devel/policyhelp
 Requires:       %{name}
 Requires:       selinux-policy >= %{selinux_policyver} selinux-policy-targeted
@@ -109,8 +109,8 @@ for selinuxvariant in %{selinux_variants}
 do
   install -d %{buildroot}%{_datadir}/selinux/${selinuxvariant}
   install -p -m 644 \
-    fedora-%{name}-%{version}/selinux/%{name}.pp.${selinuxvariant} \
-    %{buildroot}%{_datadir}/selinux/${selinuxvariant}/%{name}.pp
+    fedora-%{name}-%{version}/selinux/%{name}_custom.pp.${selinuxvariant} \
+    %{buildroot}%{_datadir}/selinux/${selinuxvariant}/%{name}_custom.pp
 done
 /usr/sbin/hardlink -cv %{buildroot}%{_datadir}/selinux
 
@@ -132,7 +132,7 @@ desktop-file-validate  \
 for selinuxvariant in %{selinux_variants}
 do
   /usr/sbin/semodule -s ${selinuxvariant} -i \
-    %{_datadir}/selinux/${selinuxvariant}/%{name}.pp &> /dev/null || :
+    %{_datadir}/selinux/${selinuxvariant}/%{name}_custom.pp &> /dev/null || :
 done
 
 %postun
@@ -184,9 +184,13 @@ fi
 
 %files selinux
 %doc fedora-%{name}-%{version}/selinux/*te
-%{_datadir}/selinux/*/%{name}.pp
+%{_datadir}/selinux/*/%{name}_custom.pp
 
 %changelog
+* Wed Jun 27 2012 Chris Smart <chris@kororaa.org> - 0.9.7-2
+- Updated SELinux policy to be compatible with selinux-policy 3.10.0-132 which includes Jockey module.
+- Improved akmod support, which is now the default.
+
 * Wed May 30 2012 Hedayat Vatankhah <hedayat.fwd+rpmchlog@gmail.com> - 0.9.7-1
 - Updated to jockey 0.9.7
 
