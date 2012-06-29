@@ -1,9 +1,9 @@
-%global selinux_variants mls targeted
+%global selinux_variants targeted mls
 %global selinux_policyver %(%{__sed} -e 's,.*selinux-policy-\\([^/]*\\)/.*,\\1,' /usr/share/selinux/devel/policyhelp || echo 0.0.0)
 
 Name:           jockey
 Version:        0.9.7
-Release:        2%{?dist}
+Release:        2%{?dist}.1
 Summary:        Jockey driver manager
 
 License:        GPLv2+
@@ -80,7 +80,7 @@ cd fedora-%{name}-%{version}/selinux
 for selinuxvariant in %{selinux_variants}
 do
   make NAME=${selinuxvariant} -f /usr/share/selinux/devel/Makefile
-  mv %{name}.pp %{name}.pp.${selinuxvariant}
+  mv %{name}_custom.pp %{name}_custom.pp.${selinuxvariant}
   make NAME=${selinuxvariant} -f /usr/share/selinux/devel/Makefile clean
 done
 cd -
